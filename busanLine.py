@@ -62,10 +62,7 @@ def find_crossing(image, lines):
                     t_X = (b2*c1 - b1*c2)/1
                     t_Y = (a1*c2 - a2*c1)/1
         if t_X > 1 and t_X < image.shape[1] and t_Y > 1 and t_Y < image.shape[0]:
-            calculate_angle([int(t_X), int(t_Y)], lines)
             return np.array([t_X, t_Y])
-        if t_X > 1 and t_Y > 1:
-            calculate_angle([int(t_X), int(t_Y)], lines)
     else:
         return
 
