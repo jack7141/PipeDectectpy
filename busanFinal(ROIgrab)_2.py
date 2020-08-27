@@ -5,6 +5,7 @@ import numpy as np
 import cv2 as cv
 import urllib
 import os
+from matplotlib import pyplot as plt
 import imutils
 import argparse
 import glob
@@ -14,10 +15,10 @@ bgdModel = np.zeros((1, 65), np.float64)
 fgdModel = np.zeros((1, 65), np.float64)
 
 
-def remove_noise(image):
-    # image = cv.imread(PATH)
-    # img = cv.resize(image, dsize=(0, 0),  fx=0.3,
-    #                 fy=0.3, interpolation=cv.INTER_AREA)
+def remove_noise(PATH):
+    image = cv.imread(PATH)
+    img = cv.resize(image, dsize=(0, 0),  fx=0.3,
+                    fy=0.3, interpolation=cv.INTER_AREA)
     # img = image
     original = img.copy()
     # 상단부 ROI
@@ -49,9 +50,10 @@ def remove_noise(image):
     # c = max(contours, key=cv.contourArea)
     # x, y, w, h = cv.boundingRect(c)
 
+    # 원본
     roi_image = img2[110:365, 0:img.shape[1]]
     rect = (0, 110, img.shape[1], 365)  # mask가 초기화 안되있을시에 사용됨
-    # cv.imshow("roi", roi_image)
+    cv.imshow("roi", roi_image)
 
     mask = np.zeros(original.shape[:2], np.uint8)
     try:
@@ -59,91 +61,94 @@ def remove_noise(image):
                    fgdModel, 5, cv.GC_INIT_WITH_RECT)
     except cv.error as e:
         print("GrabCut Error")
-        return None, Noneremove_noise
+        return None, None
 # DEFINE: 파이프를 기준으로 하단부 배경
+    # 원본
     for i in range(365, img.shape[0]):  # y
         for j in range(0, img.shape[1]):  # x
             cv.circle(mask, (j, i), 3, cv.GC_BGD, -1)
 # DEFINE: 파이프를 기준으로 상단부 배경
+    # 원본
     for i in range(0, 110):
         for j in range(0, img.shape[1]):
             cv.circle(mask, (j, i), 3, cv.GC_BGD, -1)
     cv.grabCut(original, mask, rect, bgdModel,
                fgdModel, 1, cv.GC_INIT_WITH_MASK)
 # DEFINE: 파이프(내부를 범위로 잡고)를 전경으로 설정
+
     for i in range(185, 295):
         for j in range(0, img.shape[1]):
             cv.circle(mask, (j, i), 3, cv.GC_FGD, -1)
     cv.grabCut(original, mask, rect, bgdModel,
                fgdModel, 1, cv.GC_INIT_WITH_MASK)
     img2[(mask == cv.GC_BGD) | (mask == cv.GC_PR_BGD)] = 0
-    # cv.imshow("result", img2)
+    cv.imshow("result", img2)
     # cv.imwrite(
-    #     "/home/hgh/hgh/busan_image/busan39_result.jpeg", img2)
-    # cv.imshow("b23_ori.jpg", original)
-
-    # cv.waitKey()
-    # cv.destroyAllWindows()
-    return img2
-
-
-# PATH = "/home/hgh/hgh/busan_image/busan39.jpeg"
-# remove_noise(PATH)
+    #     "/home/hgh/hgh/busan_image/20200821_result/gnsea03 _20200821131832.png", img2)
+    cv.imshow("b23_ori.jpg", original)
+    plt.imshow(img2)
+    plt.show()
+    cv.waitKey()
+    cv.destroyAllWindows()
+    # return img2
 
 
-if __name__ == '__main__':
+PATH = "/home/hgh/hgh/busan_image/Image_Test_Folder/gnsea03_2000702011635.png"
+remove_noise(PATH)
 
-    # load the image and setup the mouse callback function
-    global img
-    files = glob.glob(
-        '/home/hgh/hgh/busan_image/Image_Test_Folder/gnsea03_*.png')
+# gnsea03_20200702011635
+# if __name__ == '__main__':
 
-    # files = glob.glob('/home/hgh/hgh/project/busan_project/b*.jpg')
-    files.sort()
-    img = cv.imread(files[0])
-    # img = cv.resize(img, (400, 400))
-    img = cv.resize(img, dsize=(0, 0),  fx=0.3,
-                    fy=0.3, interpolation=cv.INTER_AREA)
-    img = remove_noise(img)
-    filesName = os.path.basename(files[0])
-    print(filesName)
-    cv.imwrite(
-        "/home/hgh/hgh/busan_image/Image_result_Folder/"+filesName, img)
-    cv.imshow('PRESS P for Previous, N for Next Image', img)
+#     # load the image and setup the mouse callback function
+#     global img
+#     files = glob.glob(
+#         '/home/hgh/hgh/busan_image/20200821/gnsea03 _*.png')
 
-    # Create an empty window
-    cv.namedWindow('PRESS P for Previous, N for Next Image')
-    # Create a callback function for any event on the mouse
-    # cv.setMouseCallback(
-    #     'PRESS P for Previous, N for Next Image', showPixelValue)
+#     # files = glob.glob('/home/hgh/hgh/project/busan_project/b*.jpg')
+#     files.sort()
+#     img = cv.imread(files[0])
+#     # img = cv.resize(img, (400, 400))
+#     img = cv.resize(img, dsize=(0, 0),  fx=0.3,
+#                     fy=0.3, interpolation=cv.INTER_AREA)
+#     filesName = os.path.basename(files[0])
+#     img = remove_noise(img)
+#     print(filesName)
+#     cv.imwrite(
+#         "/home/hgh/hgh/busan_image/20200821_result/"+filesName, img)
+#     cv.imshow('PRESS P for Previous, N for Next Image', img)
+#     # Create an empty window
+#     cv.namedWindow('PRESS P for Previous, N for Next Image')
+#     # Create a callback function for any event on the mouse
+#     # cv.setMouseCallback(
+#     #     'PRESS P for Previous, N for Next Image', showPixelValue)
 
-    i = 0
+#     i = 0
 
-    while(1):
-        k = cv.waitKey(1) & 0xFF
-        # check next image in the folder
-        if k == ord('n'):
-            i += 1
-            img = cv.imread(files[i % len(files)])
-            # img = cv.resize(img, (400, 400))
-            img = cv.resize(img, dsize=(0, 0),  fx=0.3,
-                            fy=0.3, interpolation=cv.INTER_AREA)
-            img = remove_noise(img)
-            filesName = os.path.basename(files[i % len(files)])
-            cv.imwrite(
-                "/home/hgh/hgh/busan_image/Image_result_Folder/"+filesName, img)
-            cv.imshow('PRESS P for Previous, N for Next Image', img)
+#     while(1):
+#         k = cv.waitKey(1) & 0xFF
+#         # check next image in the folder
+#         if k == ord('n'):
+#             i += 1
+#             img = cv.imread(files[i % len(files)])
+#             # img = cv.resize(img, (400, 400))
+#             img = cv.resize(img, dsize=(0, 0),  fx=0.3,
+#                             fy=0.3, interpolation=cv.INTER_AREA)
+#             img = remove_noise(img)
+#             filesName = os.path.basename(files[i % len(files)])
+#             cv.imwrite(
+#                 "/home/hgh/hgh/busan_image/20200821_result/"+filesName, img)
+#             cv.imshow('PRESS P for Previous, N for Next Image', img)
 
-        # check previous image in folder
-        elif k == ord('p'):
-            i -= 1
-            img = cv.imread(files[i % len(files)])
-            # img = cv.resize(img, (400, 400))
-            img = cv.resize(img, dsize=(0, 0),  fx=0.3,
-                            fy=0.3, interpolation=cv.INTER_AREA)
-            img = remove_noise(img)
-            cv.imshow('PRESS P for Previous, N for Next Image', img)
+#         # check previous image in folder
+#         elif k == ord('p'):
+#             i -= 1
+#             img = cv.imread(files[i % len(files)])
+#             # img = cv.resize(img, (400, 400))
+#             img = cv.resize(img, dsize=(0, 0),  fx=0.3,
+#                             fy=0.3, interpolation=cv.INTER_AREA)
+#             img = remove_noise(img)
+#             cv.imshow('PRESS P for Previous, N for Next Image', img)
 
-        elif k == 27:
-            cv.destroyAllWindows()
-            break
+#         elif k == 27:
+#             cv.destroyAllWindows()
+#             break

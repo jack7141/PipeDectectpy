@@ -26,22 +26,22 @@ def make_coordinates(image, parameter):
 
 
 def calculate_angle(angles, lines):
+    각도 = 0
     top_degree_height = math.atan2(
         (lines[0][0] - angles[0]), (lines[0][1] - angles[1]))
     top_degree_bottom = math.atan2(
         (angles[0]-lines[2][0]), (angles[1]-lines[2][1]))
     degree = (top_degree_height-top_degree_bottom)*180/math.pi
     if abs(degree) > 180:
-        print(abs(int(degree))-180)
-    # print(degree)
-    # print(lines)
-    return
+        각도 = abs(int(degree))-180
+    else:
+        각도 = 180-abs(degree)
+    return 각도
 
 
 def find_crossing(image, lines):
     t_X = 0
     t_Y = 0
-    print(lines)
     newlines = list(permutations(lines, len(lines)))
     for j in range(len(newlines)):
         for i in range(len(lines[1:])):
@@ -88,11 +88,12 @@ def average_lines(image, lines):  # 직선선분만 찾기
             기울기 = 다항식피팅[0]
             절편 = 다항식피팅[1]
             slop = find_slop(x1, y1, x2, y2)
-            if 절편 < 250 and abs(slop) < 0.1:
+            # print(slop)
+            if 절편 < 250 and abs(slop) < 0.1 and x1 < 350:
                 top_fit.append((기울기, 절편))
-            elif 절편 > 250 and abs(slop) < 0.1:
+            elif 절편 > 250 and abs(slop) < 0.1 and x1 < 350:
                 bottom_fit.append((기울기, 절편))  # null일 경우에 문제 발생
-            elif abs(slop) > 0.1:
+            elif abs(slop) > 0.06 and x1 > 350 and y1 < 250:  # FIXME:곡관이 시작하는 기준점도 정해야할듯
                 curve_fit.append((기울기, 절편))
         상단_라인_평균 = np.average(top_fit, axis=0)
         하단_라인_평균 = np.average(bottom_fit, axis=0)
@@ -120,7 +121,7 @@ def Canny_filter(image):
 def display_line(image, lines):
     for line in lines:
         x1, y1, x2, y2 = line.reshape(4)
-        cv.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+        cv.line(image, (x1, y1), (x2, y2), (0, 255, 255), 2)
     return image
 
 
@@ -131,22 +132,24 @@ def remove_noise(PATH):
     img = image
     original = img.copy()
     edges = Canny_filter(original)
-    lines = cv.HoughLinesP(edges, 2, np.pi/180, 30,
-                           maxLineGap=10)
+    lines = cv.HoughLinesP(edges, 2, np.pi/180, 100,
+                           maxLineGap=30)
     average_line = average_lines(original, lines)
     line_image = display_line(original, average_line)
+    # test = display_line(original, lines)
     this_is_curve = find_crossing(original, average_line)
-
     if this_is_curve is None:
         print("직관")
     else:
         display_crossing_point(original, this_is_curve)
-        print("곡관")
+        degree = calculate_angle(this_is_curve, average_line)
+        print("곡관 :", degree)
     # cv.imwrite(
     #     "/home/hgh/hgh/busan_image/busan_3_line.jpeg", original)
 
     # img = cv.resize(img, dsize=(0, 0),  fx=0.3,
     cv.imshow("og", line_image)
+    # cv.imshow("test", test)
     # return line_image
     #                 fy=0.3, interpolation=cv.INTER_AREA)
     # plt.show()
@@ -154,7 +157,7 @@ def remove_noise(PATH):
     cv.destroyAllWindows()
 
 
-PATH = "/home/hgh/hgh/busan_image/Image_result_Folder/busan_5.jpg"
+PATH = "/home/hgh/hgh/busan_image/Image_result_Folder/gnsea03_20200702111635.png"
 remove_noise(PATH)
 
 
