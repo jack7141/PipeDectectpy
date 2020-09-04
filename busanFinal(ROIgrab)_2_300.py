@@ -15,11 +15,11 @@ bgdModel = np.zeros((1, 65), np.float64)
 fgdModel = np.zeros((1, 65), np.float64)
 
 
-def remove_noise(PATH):
-    image = cv.imread(PATH)
-    img = cv.resize(image, dsize=(0, 0),  fx=0.3,
-                    fy=0.3, interpolation=cv.INTER_AREA)
-    # img = image
+def remove_noise(image):
+    # image = cv.imread(PATH)
+    # img = cv.resize(image, dsize=(0, 0),  fx=0.3,
+    #                 fy=0.3, interpolation=cv.INTER_AREA)
+    img = image
     original = img.copy()
     # 상단부 ROI
     roi = img[0:100, 0:1225]
@@ -82,73 +82,73 @@ def remove_noise(PATH):
     cv.grabCut(original, mask, rect, bgdModel,
                fgdModel, 1, cv.GC_INIT_WITH_MASK)
     img2[(mask == cv.GC_BGD) | (mask == cv.GC_PR_BGD)] = 0
-    cv.imshow("result", img2)
+    # cv.imshow("result", img2)
     # cv.imwrite(
     #     "/home/hgh/hgh/busan_image/20200821_result/gnsea03 _20200821131832.png", img2)
-    cv.imshow("b23_ori.jpg", original)
-    plt.imshow(img2)
+    # cv.imshow("b23_ori.jpg", original)
+    plt.imshow(original)
     plt.show()
-    cv.waitKey()
-    cv.destroyAllWindows()
-    # return img2
+    # cv.waitKey()
+    # cv.destroyAllWindows()
+    return img2
 
 
-PATH = "/home/hgh/hgh/busan_image/Image_Test_Folder/gnsea03_2000702011635.png"
-remove_noise(PATH)
+# PATH = "/home/hgh/hgh/busan_image/Image_Test_Folder/gnsea03_2000702011635.png"
+# remove_noise(PATH)
 
 # gnsea03_20200702011635
-# if __name__ == '__main__':
+if __name__ == '__main__':
 
-#     # load the image and setup the mouse callback function
-#     global img
-#     files = glob.glob(
-#         '/home/hgh/hgh/busan_image/20200821/gnsea03 _*.png')
+    # load the image and setup the mouse callback function
+    global img
+    files = glob.glob(
+        '/home/hgh/hgh/busan_image/20200617/gnsea03_*.png')
 
-#     # files = glob.glob('/home/hgh/hgh/project/busan_project/b*.jpg')
-#     files.sort()
-#     img = cv.imread(files[0])
-#     # img = cv.resize(img, (400, 400))
-#     img = cv.resize(img, dsize=(0, 0),  fx=0.3,
-#                     fy=0.3, interpolation=cv.INTER_AREA)
-#     filesName = os.path.basename(files[0])
-#     img = remove_noise(img)
-#     print(filesName)
-#     cv.imwrite(
-#         "/home/hgh/hgh/busan_image/20200821_result/"+filesName, img)
-#     cv.imshow('PRESS P for Previous, N for Next Image', img)
-#     # Create an empty window
-#     cv.namedWindow('PRESS P for Previous, N for Next Image')
-#     # Create a callback function for any event on the mouse
-#     # cv.setMouseCallback(
-#     #     'PRESS P for Previous, N for Next Image', showPixelValue)
+    # files = glob.glob('/home/hgh/hgh/project/busan_project/b*.jpg')
+    files.sort()
+    img = cv.imread(files[0])
+    # img = cv.resize(img, (400, 400))
+    img = cv.resize(img, dsize=(0, 0),  fx=0.3,
+                    fy=0.3, interpolation=cv.INTER_AREA)
+    filesName = os.path.basename(files[0])
+    img = remove_noise(img)
+    print(filesName)
+    cv.imwrite(
+        "/home/hgh/hgh/busan_image/20200617_line_result/"+filesName, img)
+    cv.imshow('PRESS P for Previous, N for Next Image', img)
+    # Create an empty window
+    cv.namedWindow('PRESS P for Previous, N for Next Image')
+    # Create a callback function for any event on the mouse
+    # cv.setMouseCallback(
+    #     'PRESS P for Previous, N for Next Image', showPixelValue)
 
-#     i = 0
+    i = 0
 
-#     while(1):
-#         k = cv.waitKey(1) & 0xFF
-#         # check next image in the folder
-#         if k == ord('n'):
-#             i += 1
-#             img = cv.imread(files[i % len(files)])
-#             # img = cv.resize(img, (400, 400))
-#             img = cv.resize(img, dsize=(0, 0),  fx=0.3,
-#                             fy=0.3, interpolation=cv.INTER_AREA)
-#             img = remove_noise(img)
-#             filesName = os.path.basename(files[i % len(files)])
-#             cv.imwrite(
-#                 "/home/hgh/hgh/busan_image/20200821_result/"+filesName, img)
-#             cv.imshow('PRESS P for Previous, N for Next Image', img)
+    while(1):
+        k = cv.waitKey(1) & 0xFF
+        # check next image in the folder
+        if k == ord('n'):
+            i += 1
+            img = cv.imread(files[i % len(files)])
+            # img = cv.resize(img, (400, 400))
+            img = cv.resize(img, dsize=(0, 0),  fx=0.3,
+                            fy=0.3, interpolation=cv.INTER_AREA)
+            img = remove_noise(img)
+            filesName = os.path.basename(files[i % len(files)])
+            cv.imwrite(
+                "/home/hgh/hgh/busan_image/20200617_line_result/"+filesName, img)
+            cv.imshow('PRESS P for Previous, N for Next Image', img)
 
-#         # check previous image in folder
-#         elif k == ord('p'):
-#             i -= 1
-#             img = cv.imread(files[i % len(files)])
-#             # img = cv.resize(img, (400, 400))
-#             img = cv.resize(img, dsize=(0, 0),  fx=0.3,
-#                             fy=0.3, interpolation=cv.INTER_AREA)
-#             img = remove_noise(img)
-#             cv.imshow('PRESS P for Previous, N for Next Image', img)
+        # check previous image in folder
+        elif k == ord('p'):
+            i -= 1
+            img = cv.imread(files[i % len(files)])
+            # img = cv.resize(img, (400, 400))
+            img = cv.resize(img, dsize=(0, 0),  fx=0.3,
+                            fy=0.3, interpolation=cv.INTER_AREA)
+            img = remove_noise(img)
+            cv.imshow('PRESS P for Previous, N for Next Image', img)
 
-#         elif k == 27:
-#             cv.destroyAllWindows()
-#             break
+        elif k == 27:
+            cv.destroyAllWindows()
+            break
